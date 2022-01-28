@@ -81,6 +81,10 @@ export default class SceneInit {
         //     console.log(gltf);
         // });
 
+        //import de la clock
+        this.clock = new THREE.Clock();
+        
+        //ajout du perso
         const FBXloader = new FBXLoader();
         FBXloader.load(ModelLoad, (fbx) => {
             fbx.scale.setScalar(0.1);
@@ -88,6 +92,7 @@ export default class SceneInit {
                 c.castShadow = true;
             });
 
+            //ajout de l'animation
             const anim = new FBXLoader()
             anim.load(AnimModel, (anim) => {
                 this.mixer = new THREE.AnimationMixer(fbx)
@@ -96,8 +101,6 @@ export default class SceneInit {
             });
             this.scene.add(fbx)
         })
-
-
 
         document.body.appendChild(this.renderer.domElement);
 
@@ -128,9 +131,12 @@ export default class SceneInit {
         requestAnimationFrame(() => {
             this.render();
         })
+        //update de l'animation
+        const delta = this.clock.getDelta();
+        this.mixer.update(delta);
+        this.controls.update();
         this.stats.update();
         this.renderer.render(this.scene, this.camera);
-        this.controls.update();
     }
 
     onWindowResize() {
