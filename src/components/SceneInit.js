@@ -12,15 +12,18 @@ import top from "../images/top.png"
 //import ModelTest from "../assets/models/argon.gltf"
 import ModelLoad from "../assets/models/mremireh_o_desbiens.fbx"
 import AnimModel from "../assets/models/HipHopDancing.fbx"
+import Character from "./Character"
 
 export default class SceneInit {
-    constructor(fov = 60, camera, scene, stats, controls, renderer, shadowMap) {
+    constructor(fov = 60) {
         this.fov = fov;
-        this.scene = scene;
-        this.stats = stats;
-        this.camera = camera;
-        this.controls = controls;
-        this.renderer = renderer;
+        this.scene = new THREE.Scene();
+        this.stats = null;
+        this.camera = null;
+        this.controls = null;
+        this.renderer = null;
+        this.clock = new THREE.Clock();
+        this.mainCharacter = new Character(ModelLoad, AnimModel, this.clock, this.scene);
     }
 
 
@@ -34,7 +37,7 @@ export default class SceneInit {
         this.camera.position.set = ([0, 0, 0]);
 
 
-        this.scene = new THREE.Scene();
+        //this.scene = new THREE.Scene();
 
 
         this.renderer = new THREE.WebGLRenderer({
@@ -67,41 +70,6 @@ export default class SceneInit {
         const helpers = new THREE.AxesHelper();
         this.scene.add(helpers);
 
-
-        // //bonhomme 
-        // const GLTFloader = new GLTFLoader();
-
-        // GLTFloader.load(ModelTest, (gltf) => {
-        //     const model = gltf.scene;
-        //     model.position.y = 2.8;
-        //     // this.mixer = new THREE.AnimationMixer(model);
-        //     // const clip1 = gltf.animations[0];
-        //     // this.action1 = this.mixer.clipAction(clip1);
-        //     this.scene.add(model);
-        //     console.log(gltf);
-        // });
-
-        //import de la clock
-        this.clock = new THREE.Clock();
-        
-        //ajout du perso
-        const FBXloader = new FBXLoader();
-        FBXloader.load(ModelLoad, (fbx) => {
-            fbx.scale.setScalar(0.1);
-            fbx.traverse(c => {
-                c.castShadow = true;
-            });
-
-            //ajout de l'animation
-            const anim = new FBXLoader()
-            anim.load(AnimModel, (anim) => {
-                this.mixer = new THREE.AnimationMixer(fbx)
-                const idle = this.mixer.clipAction(anim.animations[0])
-                idle.play()
-            });
-            this.scene.add(fbx)
-        })
-
         document.body.appendChild(this.renderer.domElement);
 
         this.camera.position.y = 50;
@@ -133,7 +101,9 @@ export default class SceneInit {
         })
         //update de l'animation
         const delta = this.clock.getDelta();
-        this.mixer.update(delta);
+        if(this.mainCharacter.mixer){
+            this.mainCharacter.mixer.update(delta);
+        }
         this.controls.update();
         this.stats.update();
         this.renderer.render(this.scene, this.camera);
